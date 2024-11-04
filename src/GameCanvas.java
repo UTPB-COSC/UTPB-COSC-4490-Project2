@@ -18,6 +18,7 @@ public class GameCanvas extends JPanel {
     private boolean gameOver;  // Tracks if the game is over
     private boolean onTitleScreen = true;  // Title screen flag
     private Image seaBackground;
+    private EnemyBoat enemyBoat;
 
     public GameCanvas() {
         rocks = new ArrayList<>();
@@ -26,6 +27,7 @@ public class GameCanvas extends JPanel {
         gameOver = false;  // Game starts with gameOver set to false
         setUpMouseListener();  // Set up mouse listener for clicking "Start Game"
         loadSeaBackground();  // Load the sea background
+        enemyBoat = new EnemyBoat(400, 600, 100);  // Example patrol area
     }
 
     public void generateRocks() {
@@ -152,11 +154,15 @@ public class GameCanvas extends JPanel {
 
         // Draw the boat
         boat.draw(g);
+
+        // Draw the enemy boat
+        enemyBoat.draw(g);  
     }
 
     public void updateGame() {
         if (!onTitleScreen && !gameOver) {
             boat.updatePosition();  // Update boat position
+            enemyBoat.updatePosition();  // Update enemy boat position
 
             // Check for collisions with rocks
             for (Rock rock : rocks) {
@@ -167,7 +173,17 @@ public class GameCanvas extends JPanel {
                 }
             }
 
-            repaint();  // Repaint the screen after updating position
+             // Check if player is in enemy detection range
+        if (enemyBoat.isPlayerInRange(boat)) {
+            // Implement logic for enemy interaction (e.g., chase or attack)
+        }
+
+         // Check for collision between player boat and enemy boat
+         if (boat.getBounds().intersects(enemyBoat.getBounds())) {
+            gameOver = true;  // End game on collision with enemy boat
+        }
+
+        repaint();
         }
     }
 
