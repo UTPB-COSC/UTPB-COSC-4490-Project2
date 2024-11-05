@@ -21,6 +21,8 @@ public class GameCanvas extends JPanel {
     private EnemyBoat enemyBoat;
     private enum GameState { PLAYING, PAUSED, GAME_OVER, MENU }
     private GameState currentState = GameState.MENU;
+    private DebugOverlay debugOverlay = new DebugOverlay();
+
 
     public GameCanvas() {
         rocks = new ArrayList<>();
@@ -94,23 +96,40 @@ public class GameCanvas extends JPanel {
             drawPauseMenu(g);
         } else {
             drawGameElements(g);
+            debugOverlay.draw(g, boat, enemyBoat, rocks);
         }
     }
 
     private void drawTitleScreen(Graphics g) {
+        // Background color
         g.setColor(Color.CYAN);
         g.fillRect(0, 0, screenWidth, screenHeight);
-
+    
+        // Title
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 48));
         g.drawString("Pirate Battleship", screenWidth / 2 - 180, screenHeight / 3);
-
+    
+        // Start Game button
         g.setColor(Color.BLACK);
         g.fillRect(screenWidth / 2 - 100, screenHeight / 2, 200, 50);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.PLAIN, 24));
         g.drawString("Start Game", screenWidth / 2 - 60, screenHeight / 2 + 35);
+    
+        // Controls and Instructions
+        g.setFont(new Font("Arial", Font.PLAIN, 18));
+        g.setColor(Color.BLACK);
+        int instructionsY = screenHeight / 2 + 100;  // Start y-position for instructions
+    
+        g.drawString("Controls:", screenWidth / 2 - 100, instructionsY);
+        g.drawString("Arrow Keys: Move Boat", screenWidth / 2 - 100, instructionsY + 30);
+        g.drawString("P: Pause/Resume Game", screenWidth / 2 - 100, instructionsY + 60);
+        g.drawString("R: Reset Game", screenWidth / 2 - 100, instructionsY + 90);
+        g.drawString("Q: Quit Game", screenWidth / 2 - 100, instructionsY + 120);
+        g.drawString("D: Toggle Debug Mode", screenWidth / 2 - 100, instructionsY + 150);
     }
+    
 
     private void drawGameOverScreen(Graphics g) {
         g.setColor(Color.CYAN);
@@ -152,6 +171,7 @@ public class GameCanvas extends JPanel {
         if (currentState == GameState.PLAYING) {
             boat.updatePosition();
             enemyBoat.updatePosition();
+            debugOverlay.incrementUpdateCount();
 
             for (Rock rock : rocks) {
                 if (boat.getBounds().intersects(rock.getBounds())) {
@@ -170,6 +190,7 @@ public class GameCanvas extends JPanel {
                 currentState = GameState.GAME_OVER;
             }
 
+            debugOverlay.update();
             repaint();
         }
     }
@@ -190,6 +211,7 @@ public class GameCanvas extends JPanel {
         g.drawString("Press 'P' to Resume", screenWidth / 2 - 80, screenHeight / 2 + 20);
         g.drawString("Press 'R' to Reset", screenWidth / 2 - 80, screenHeight / 2 + 60);
         g.drawString("Press 'Q' to Quit", screenWidth / 2 - 80, screenHeight / 2 + 100);
+        g.drawString("Press 'D' to open Debug mode", screenWidth / 2 - 80, screenHeight / 2 + 140);
     }
 
     public void handleKeyPress(int keyCode) {
@@ -197,6 +219,8 @@ public class GameCanvas extends JPanel {
             resetGame();
         } else if (keyCode == KeyEvent.VK_Q) {
             System.exit(0);
+        } else if (keyCode == KeyEvent.VK_D) { // Toggle debug mode
+            debugOverlay.toggleDebugMode();
         } else if (currentState == GameState.PLAYING) {
             if (keyCode == KeyEvent.VK_P) {
                 currentState = GameState.PAUSED;
