@@ -31,7 +31,8 @@ public class GameCanvas extends JPanel {
         gameOver = false;
         setUpMouseListener();
         loadSeaBackground();
-        enemyBoat = new EnemyBoat(400, 600, 100);
+        enemyBoat = new EnemyBoat(400, 600, 300, 500, 700, 700); // Customize patrol area as needed
+
 
         // Set up key listener for handling key events
         setFocusable(true);
@@ -164,25 +165,23 @@ public class GameCanvas extends JPanel {
             rock.draw(g);
         }
         boat.draw(g);
-        enemyBoat.draw(g);
+        enemyBoat.draw(g);  // Draw the enemy boat
     }
+
 
     public void updateGame() {
         if (currentState == GameState.PLAYING) {
             boat.updatePosition();
-            enemyBoat.updatePosition();
+            enemyBoat.updatePosition();  // Update enemy position
             debugOverlay.incrementUpdateCount();
 
+            // Check for collisions
             for (Rock rock : rocks) {
                 if (boat.getBounds().intersects(rock.getBounds())) {
                     gameOver = true;
                     currentState = GameState.GAME_OVER;
                     break;
                 }
-            }
-
-            if (enemyBoat.isPlayerInRange(boat)) {
-                // Logic for enemy boat interaction can go here
             }
 
             if (boat.getBounds().intersects(enemyBoat.getBounds())) {

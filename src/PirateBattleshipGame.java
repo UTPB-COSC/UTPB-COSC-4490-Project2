@@ -1,16 +1,11 @@
-//Aswin Lohani 
-
-
-
 import javax.swing.JFrame;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-
-
-public class PirateBattleshipGame extends JFrame {
+public class PirateBattleshipGame extends JFrame implements Runnable {
 
     private GameCanvas gameCanvas;
+    private volatile boolean running = true;  // Allows for a graceful exit from the game loop
 
     public PirateBattleshipGame() {
         setTitle("Pirate Battleship Game");
@@ -35,21 +30,33 @@ public class PirateBattleshipGame extends JFrame {
 
         setVisible(true);
 
-        // Start the game loop
-        startGameLoop();
+        // Start the game loop in a new thread
+        new Thread(this).start();
     }
 
-    private void startGameLoop() {
-        // Game loop runs indefinitely
-        while (true) {
-            try {
-                Thread.sleep(16);  // Delay to achieve ~60 FPS
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    @Override
+    public void run() {
+        final int targetFPS = 60;
+        final long optimalTime = 1_000_000_000 / targetFPS; // Optimal time per frame in nanoseconds
 
-            // Continuously update the game state
+        while (running) {
+            long startTime = System.nanoTime();
+
+            // Update game state and repaint the canvas
             gameCanvas.updateGame();
+            gameCanvas.repaint();
+
+            // Calculate elapsed time and sleep to maintain target frame rate
+            long elapsedTime = System.nanoTime() - startTime;
+            long sleepTime = (optimalTime - elapsedTime) / 1_000_000; // Convert to milliseconds
+
+            if (sleepTime > 0) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
