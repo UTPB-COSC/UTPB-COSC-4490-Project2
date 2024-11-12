@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="core-2.5-sources">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/core-2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jvm-2.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/core-2.5-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jvm-2.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
