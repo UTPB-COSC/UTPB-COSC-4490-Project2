@@ -4,10 +4,10 @@
 
 ## Features
 
-- **Player & Enemy Movement**: The player can move within the grid. An enemy are also present, and they react to bomb explosions.
+- **Player & Enemy Movement**: The player can move within the grid. An enemy is also present, and it reacts to bomb explosions.
 - **Bomb Placement & Explosion**: Players can place one bomb at a time, which explodes after a set delay, affecting nearby blocks and the enemy.
 - **Game State Management**: The game has different states such as Running, Paused, Game Over, and Game Won.
-- **Graphics & Animations**: Custom images and animations for bombs and explosions.
+- **Graphics & Animations**: Custom images and animations for bombs and explosions. ***Fingers Crossed*** the picture for the bomb explosion works
 - **Sound Effects**: Explosion sound when the bomb detonates.
 - **Debug Mode**: Displays additional information, such as FPS, player and enemy positions, and the bomb’s blast radius.
 
