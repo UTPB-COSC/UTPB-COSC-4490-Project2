@@ -13,7 +13,7 @@
 
 ## Project Structure
 
-### GameCanvas Class
+### `GameCanvas` Class
 ### `Game` Class
 ### `Player` Class
 ### `Enemy` Class
