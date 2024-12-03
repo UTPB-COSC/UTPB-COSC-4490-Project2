@@ -9,10 +9,11 @@ import java.awt.image.BufferedImage;
 public class Bomb {
     public int x, y;  
     private Game game;
-    private BufferedImage bombImg;  
-    private BufferedImage explosionImg;
+    private BufferedImage scaledImage;
+    private BufferedImage scaledExplosion;
     private long placementTime; 
-    private static final long EXPLOSION_DELAY = 1000; 
+    private static final long EXPLOSION_DELAY = 1000;
+    private static final long EXPLOSION_LIFE = 100;
     public boolean exploded = false;
     private boolean soundPlayed = false;
     public Bomb(int x, int y, Game game) {
@@ -21,13 +22,28 @@ public class Bomb {
         this.game = game;
 
         try {
-            bombImg = ImageIO.read(new File("bombpic.png"));
+            BufferedImage bombImg = ImageIO.read(new File("bombpic.png"));
             System.out.println("Bomb image loaded successfully");
-            
+
+            scaledImage = new BufferedImage(game.tileSize, game.tileSize, BufferedImage.TYPE_INT_ARGB);
+            Graphics g = scaledImage.getGraphics();
+            Image tempImage = bombImg.getScaledInstance(game.tileSize, game.tileSize, Image.SCALE_SMOOTH);
+            g.drawImage(tempImage, 0, 0, null);
+            g.dispose();
+
+            BufferedImage explosionImg = ImageIO.read(new File("explosionimg.png"));
+            System.out.println("Bomb Explosion image loaded successfully");
+
+            scaledExplosion = new BufferedImage(game.tileSize, game.tileSize, BufferedImage.TYPE_INT_ARGB);
+            g = scaledExplosion.getGraphics();
+            tempImage = explosionImg.getScaledInstance(game.tileSize, game.tileSize, Image.SCALE_SMOOTH);
+            g.drawImage(tempImage, 0, 0, null);
+            g.dispose();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Bomb image doesn't load");
-            bombImg = null;
+            //bombImg = null;
+            System.exit(1);
         }
         
 
@@ -38,25 +54,17 @@ public class Bomb {
         if (!exploded && System.currentTimeMillis() - placementTime >= EXPLOSION_DELAY) {
             explode();
         }
+        if (exploded && System.currentTimeMillis() - placementTime >= EXPLOSION_DELAY + EXPLOSION_LIFE) {
+            game.currentBomb = null;
+        }
     }
 
     private void explode() {
         exploded = true;
         if (!soundPlayed) {
             playExplosionSound();
-            
-
-            
 
             soundPlayed = true;  
-        }
-        try {
-            explosionImg = ImageIO.read(new File("explosionimg.png"));
-            System.out.println("Bomb Explosion image loaded successfully");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Bomb explosion image doesn't load");
-            bombImg = null;
         }
 
         int[][] directions = {
@@ -89,31 +97,27 @@ public class Bomb {
                 }
             }
         }
-        game.currentBomb = null;
     }
 
     public void draw(Graphics g) {
-        if (bombImg != null) {
-            Image scaledImage = bombImg.getScaledInstance(game.tileSize, game.tileSize, Image.SCALE_SMOOTH);
+        if (scaledImage != null) {
             g.drawImage(scaledImage, x * game.tileSize, y * game.tileSize, null);
         } else {
             g.setColor(Color.BLUE);
             g.fillRect(x * game.tileSize, y * game.tileSize, game.tileSize, game.tileSize);
         }
-        if (exploded && explosionImg != null) {
+        if (exploded && scaledExplosion != null) {
             int[][] directions = {
                 {0,0},
                 {0, -1},  
                 {0, 1},   
                 {-1, 0},  
-                {1, 0}    
-    
+                {1, 0}
             };
             for (int[] direction : directions) {
                 int targetX = x + direction[0];
                 int targetY = y + direction[1];
                 if (targetX >= 0 && targetX < game.mapWidth && targetY >= 0 && targetY < game.mapHeight) {
-                    Image scaledExplosion = explosionImg.getScaledInstance(game.tileSize, game.tileSize, Image.SCALE_SMOOTH);
                     g.drawImage(scaledExplosion, targetX * game.tileSize, targetY * game.tileSize, null);
                 }
             }

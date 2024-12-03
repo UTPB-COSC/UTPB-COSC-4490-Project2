@@ -70,6 +70,7 @@ public class Game implements Runnable {
             player.keyPressed(e);
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_P) {
                 playSound("pause.wav");
+                running = false;
                 gameState = GameState.PAUSED;
             }
             if (e.getKeyCode() == KeyEvent.VK_SPACE && currentBomb == null) {
@@ -89,6 +90,7 @@ public class Game implements Runnable {
         } else if (gameState == GameState.PAUSED) {
             if (e.getKeyCode() == KeyEvent.VK_P || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playSound("pause.wav");
+                running = true;
                 gameState = GameState.RUNNING;
             }
             if (e.getKeyCode() == KeyEvent.VK_N) {
@@ -197,39 +199,6 @@ public class Game implements Runnable {
         }
     }
 
-    public void drawMenu(Graphics g) {
-        g.setColor(new Color(0, 0, 0, 150));
-        g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        g.setColor(Color.BLUE);
-        g.setFont(new Font("Arial", Font.BOLD, 50));
-        if (gameState == GameState.PAUSED) {
-            g.drawString("PAUSED", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 - 50);
-            g.setFont(new Font("Arial", Font.PLAIN, 30));
-            g.drawString("Continue Playing(P)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 10);
-            g.drawString("New Game(N)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 50);
-            g.drawString("Exit(E)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 90);
-        
-        } else if (gameState == GameState.GAME_OVER) {
-            g.setColor(Color.RED);
-            g.drawString("GAME OVER", (canvas.getWidth() / 2) - 120, canvas.getHeight() / 2 - 50);
-            g.setFont(new Font("Arial", Font.PLAIN, 30));
-            g.drawString("New Game(N)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 10);
-            g.drawString("Exit(E)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 50);
-        }
-        
-        else if (gameState == GameState.GAME_WON) {
-            g.setColor(Color.GREEN);
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-            g.drawString("Congratulations! You Won", (canvas.getWidth() / 2) - 120, canvas.getHeight() / 2 - 50);
-            g.setFont(new Font("Arial", Font.PLAIN, 30));
-            g.drawString("New Game(N)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 10);
-            g.drawString("Exit(E)", (canvas.getWidth() / 2) - 100, canvas.getHeight() / 2 + 50);
-            
-        }
-
-    }
-
     @Override
     public void run() {
         long lastTime = System.nanoTime();
@@ -263,7 +232,7 @@ public class Game implements Runnable {
                     }
                     lastTime = now;
                 }
-                canvas.repaint();
+                //canvas.repaint();
                 frames++;
                 frameCounter++;
                 if (System.currentTimeMillis() - timer > 1000) {
