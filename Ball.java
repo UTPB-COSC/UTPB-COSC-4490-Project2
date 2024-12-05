@@ -25,7 +25,7 @@ public class Ball {
 
     private void loadImage() {
         try {
-            ballImage = ImageIO.read(new File("src/ball_spritesheet.png")); // Adjust to actual path
+            ballImage = ImageIO.read(new File("ball_spritesheet.png")); // Adjust to actual path
         } catch (IOException e) {
             System.err.println("Failed to load ball image.");
             e.printStackTrace();
@@ -82,6 +82,7 @@ public class Ball {
         if (y - radius <= 0) {
             velocityY = -(int) (velocityY * damping);
             y = radius;
+            
         }
         if (x - radius <= 0) {
             velocityX = -(int) (velocityX * damping);
