@@ -22,6 +22,11 @@ public class LevelManager {
 
 
 
+    public void advanceLevel() {
+        currentLevel++;
+    }
+    
+    
     private LevelData levelOne() {
         List<Platform> platforms = new ArrayList<>();
         List<Spike> spikes = new ArrayList<>();
@@ -36,11 +41,6 @@ public class LevelManager {
 
         return new LevelData(platforms, spikes, goal);
     }
-
-    public void advanceLevel() {
-        currentLevel++;
-    }
-    
 
     private LevelData levelTwo() {
         List<Platform> platforms = new ArrayList<>();
@@ -109,7 +109,7 @@ public class LevelManager {
         platforms.add(new Platform(1100, screenSize.height - 600, 40, 20));
         platforms.add(new Platform(1350, screenSize.height - 700, 40, 20));
 
-        Goal goal = new Goal(1350, screenSize.height - 200, 60, 20);
+        Goal goal = new Goal(1350, screenSize.height - 200, 110, 30);
 
         return new LevelData(platforms, spikes, goal);
     }
@@ -151,7 +151,7 @@ public class LevelManager {
         platforms.add(new Platform(1800, screenSize.height - 850, 80, 20));
     
         // Placing the goal at the peak, so players need to navigate through the obstacles
-        Goal goal = new Goal(1400, screenSize.height - 500, 60, 20);
+        Goal goal = new Goal(1400, screenSize.height - 500, 110, 20);
     
         return new LevelData(platforms, spikes, goal);
     }
@@ -195,11 +195,52 @@ public class LevelManager {
         spikes.add(new Spike(1500, screenSize.height - 2, 20));
     
         // Goal placed at the peak
-        Goal goal = new Goal(1400, screenSize.height - 70, 100, 10);
+        Goal goal = new Goal(1400, screenSize.height - 270, 120, 30);
     
         return new LevelData(platforms, spikes, goal);
     }
     
+    
+    private LevelData levelSeven() {
+        List<Platform> platforms = new ArrayList<>();
+        List<Spike> spikes = new ArrayList<>();
+/*
+        platforms.add(new Platform(100, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(700, screenSize.height - 400, 400, 20));
+
+        spikes.add(new Spike(300, screenSize.height - 2, 20));
+        spikes.add(new Spike(500, screenSize.height - 380, 20));
+ */
+
+        platforms.add(new Platform(100, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(300, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(500, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(700, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(900, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(1100, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(1300, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(1500, screenSize.height - 200, 500, 20));
+        Goal goal = new Goal(1500, screenSize.height - 900, 30, 110);
+
+        return new LevelData(platforms, spikes, goal);
+    }
+    private LevelData levelEight() {
+        List<Platform> platforms = new ArrayList<>();
+        List<Spike> spikes = new ArrayList<>();
+/*
+        platforms.add(new Platform(100, screenSize.height - 200, 500, 20));
+        platforms.add(new Platform(700, screenSize.height - 400, 400, 20));
+
+        spikes.add(new Spike(300, screenSize.height - 2, 20));
+        spikes.add(new Spike(500, screenSize.height - 380, 20));
+ */
+
+        platforms.add(new Platform(200, screenSize.height - 510, 20, 500));
+
+        Goal goal = new Goal(40, screenSize.height - 30, 110, 30);
+
+        return new LevelData(platforms, spikes, goal);
+    }
     
    public LevelData loadLevel() {
     switch (currentLevel) {
