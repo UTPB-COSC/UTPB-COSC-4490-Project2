@@ -256,6 +256,10 @@ public class LevelManager {
             return levelFive();
         case 6:
             return levelSix();
+        case 7:
+            return levelSeven();
+        case 8:
+            return levelEight();
         default:
             currentLevel = 1;  
             return levelOne();
