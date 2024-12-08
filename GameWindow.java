@@ -1,4 +1,4 @@
-import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioInputStream; 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.*;
@@ -112,7 +112,7 @@ public class GameWindow extends JPanel implements KeyListener {
         if (isPaused) {
             // Reset the last update time so deltaTime does not accumulate while paused
             lastUpdateTime = System.nanoTime();
-            return; // No updates should be made to the game state
+            return; // No updates while paused
         }
 
         long currentTime = System.nanoTime();
@@ -122,9 +122,8 @@ public class GameWindow extends JPanel implements KeyListener {
         if (!gameOver && !gameWon) {
             // Update ball position only if not paused
             ball.updatePosition(deltaTime);
-            ball.bounce();
 
-            // Handle collisions
+            // Handle collisions with spikes
             if (spikes != null) {
                 for (Spike spike : spikes) {
                     if (spike.intersects(ball)) {
@@ -135,6 +134,7 @@ public class GameWindow extends JPanel implements KeyListener {
                 }
             }
 
+            // Handle collisions with platforms
             if (platforms != null) {
                 for (Platform platform : platforms) {
                     if (ball.intersectsPlatform(platform)) {
@@ -143,6 +143,7 @@ public class GameWindow extends JPanel implements KeyListener {
                 }
             }
 
+            // Check for goal
             if (goal != null && goal.isBallInGoal(ball)) {
                 gameWon = true;
                 playWinSound();
@@ -160,7 +161,7 @@ public class GameWindow extends JPanel implements KeyListener {
         // Render background
         g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 
-        // Pause menu overlay
+        // Pause overlay
         if (isPaused) {
             g.setColor(new Color(0, 0, 0, 150)); // Transparent dark overlay
             g.fillRect(0, 0, getWidth(), getHeight());
@@ -171,10 +172,10 @@ public class GameWindow extends JPanel implements KeyListener {
             g.drawString("Press R to Reset", getWidth() / 2 - 100, getHeight() / 2 - 40);
             g.drawString("Press Q to Quit", getWidth() / 2 - 100, getHeight() / 2);
             g.drawString("Press P to Resume", getWidth() / 2 - 100, getHeight() / 2 + 40);
-            return; // Exit after rendering pause menu
+            return;
         }
 
-        // Render gameplay elements if not paused
+        // Draw gameplay elements
         ball.draw(g);
         if (spikes != null) {
             for (Spike spike : spikes) {
@@ -192,7 +193,7 @@ public class GameWindow extends JPanel implements KeyListener {
             goal.draw(g);
         }
 
-        // Debug information rendering
+        // Debug info
         if (debugMode) {
             g.setColor(Color.BLACK);
             g.setFont(new Font("Verdana", Font.PLAIN, 16));
@@ -202,13 +203,18 @@ public class GameWindow extends JPanel implements KeyListener {
             g.drawString("Velocity: (" + ball.getVelocityX() + ", " + ball.getVelocityY() + ")", 10, 80);
 
             // Draw hitboxes
-            for (Platform platform : platforms) {
-                g.setColor(Color.BLACK);
-                g.drawRect(platform.getX(), platform.getY(), platform.getWidth(), platform.getHeight());
+            if (platforms != null) {
+                for (Platform platform : platforms) {
+                    g.setColor(Color.BLACK);
+                    g.drawRect(platform.getX(), platform.getY(), platform.getWidth(), platform.getHeight());
+                }
             }
-            for (Spike spike : spikes) {
-                g.setColor(Color.BLACK);
-                g.drawRect(spike.x, spike.y - spike.size, spike.size, spike.size);
+            if (spikes != null) {
+                for (Spike spike : spikes) {
+                    g.setColor(Color.BLACK);
+                    g.drawRect(spike.getX(), spike.getY() - spike.getSize(), spike.getSize(), spike.getSize());
+
+                }
             }
         }
 
@@ -317,13 +323,13 @@ public class GameWindow extends JPanel implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
             isLeftPressed = false;
             if (!isRightPressed) {
-                ball.setVelocityX(0); // Stop horizontal movement if no direction is pressed
+                ball.setVelocityX(0); // You could remove this to rely entirely on friction.
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             isRightPressed = false;
             if (!isLeftPressed) {
-                ball.setVelocityX(0); // Stop horizontal movement if no direction is pressed
+                ball.setVelocityX(0); // You could remove this to rely entirely on friction.
             }
         }
     }

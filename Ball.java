@@ -5,13 +5,14 @@ import java.io.File;
 import java.io.IOException;
 
 public class Ball {
-    private double x, y; // Position as double for smoother movement
+    private double x, y;         // Current position
+    private double oldX, oldY;   // Previous position (before this frame's movement)
     private int radius;
-    private double velocityX, velocityY; // Velocity as double
-    private final int gravity = 900; // Gravity factor
-    private final double friction = 0.95; // Friction coefficient for smoother deceleration
-    private final int stopThreshold = 5; // Threshold for minimal velocity to stop the ball
-    public boolean onGround = true;
+    private double velocityX, velocityY; 
+    private final double gravity = 900;           // Gravity (pixels/s^2)
+    private final double horizontalDeceleration = 600; // Horizontal deceleration (pixels/s^2)
+    private final int stopThreshold = 5;          // Threshold below which horizontal velocity stops
+    public boolean onGround = false;              // True if ball is on a platform this frame
     private Image ballImage;
 
     public Ball(int startX, int startY, int radius) {
@@ -25,7 +26,7 @@ public class Ball {
 
     private void loadImage() {
         try {
-            ballImage = ImageIO.read(new File("ball_spritesheet.png")); // Adjust to actual path
+            ballImage = ImageIO.read(new File("ball_spritesheet.png")); // Adjust to the actual path
         } catch (IOException e) {
             System.err.println("Failed to load ball image.");
             e.printStackTrace();
@@ -38,9 +39,9 @@ public class Ball {
     public int getVelocityX() { return (int) velocityX; }
     public int getVelocityY() { return (int) velocityY; }
 
-    public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public void setPosition(int newX, int newY) {
+        this.x = newX;
+        this.y = newY;
     }
 
     public boolean isOnGround() {
@@ -48,20 +49,30 @@ public class Ball {
     }
 
     public void updatePosition(double deltaTime) {
-        // Apply gravity
-        velocityY += gravity * deltaTime;
+        // Store old positions for collision direction checks
+        oldX = x;
+        oldY = y;
 
-        // Apply friction if no key is pressed
+        // Apply gravity and move vertically first
+        velocityY += gravity * deltaTime;
+        y += velocityY * deltaTime;
+
+        // Apply horizontal friction as a deceleration if no keys are pressed
         if (!GameWindow.isLeftPressed && !GameWindow.isRightPressed) {
-            velocityX *= friction;
-            if (Math.abs(velocityX) < stopThreshold) {
-                velocityX = 0; // Stop completely if velocity is very small
+            double frictionForce = horizontalDeceleration * deltaTime;
+            if (Math.abs(velocityX) < frictionForce) {
+                velocityX = 0;
+            } else {
+                velocityX -= Math.signum(velocityX) * frictionForce;
             }
         }
 
-        // Update ball position
+        // Move horizontally after vertical movement is done
         x += velocityX * deltaTime;
-        y += velocityY * deltaTime;
+
+        // We don't set onGround = false here yet, because we might check collisions right after this
+        // in the main game loop. After collision handling, if no top collision occurred, onGround will remain false.
+        onGround = false; 
     }
 
     public void setVelocityX(int velocityX) { 
@@ -72,53 +83,60 @@ public class Ball {
         this.velocityY = velocityY; 
     }
 
-    public void bounce() {
-        double damping = 0.5; // Damping factor for bounce effect
-        if (y + radius >= GameWindow.getFloorHeight()) {
-            velocityY = -(int) (velocityY * damping);
-            y = GameWindow.getFloorHeight() - radius;
-            onGround = true;
-        }
-        if (y - radius <= 0) {
-            velocityY = -(int) (velocityY * damping);
-            y = radius;
-            
-        }
-        if (x - radius <= 0) {
-            velocityX = -(int) (velocityX * damping);
-            x = radius;
-        }
-        if (x + radius >= GameWindow.getWallWidth()) {
-            velocityX = -(int) (velocityX * damping);
-            x = GameWindow.getWallWidth() - radius;
-        }
-    }
+    // We have removed the bounce() method that handled window boundaries.
+    // If you need boundary collisions, treat the window edges like static platforms.
 
     public boolean intersectsPlatform(Platform platform) {
-        // Check horizontal and vertical overlap
-        return x + radius > platform.getX() &&
-               x - radius < platform.getX() + platform.getWidth() &&
-               y + radius > platform.getY() &&
-               y - radius < platform.getY() + platform.getHeight();
+        // Simple bounding box check
+        return (x + radius > platform.getX() &&
+                x - radius < platform.getX() + platform.getWidth() &&
+                y + radius > platform.getY() &&
+                y - radius < platform.getY() + platform.getHeight());
     }
 
     public void handlePlatformCollision(Platform platform) {
-        // Top collision
-        if (y + radius >= platform.getY() &&
-            y < platform.getY() &&
-            velocityY > 0) {
-            y = platform.getY() - radius; // Adjust position to sit on top of the platform
-            velocityY = -velocityY * 0.8; // Bounce effect with damping
+        // Use old and new positions to determine the collision side.
+        // Check vertical collision first:
+        boolean verticalCollision = false;
+
+        // Top collision: If previously the ball was above the platform (oldY + radius <= platformTop)
+        // and now it has moved down into it (y + radius >= platformTop)
+        if (oldY + radius <= platform.getY() && y + radius > platform.getY()) {
+            // Correct position
+            y = platform.getY() - radius;
+            // Stop vertical movement (or apply small bounce if desired)
+            velocityY = 0;
             onGround = true;
+            verticalCollision = true;
         }
-        // Bottom collision
-        else if (y - radius <= platform.getY() + platform.getHeight() &&
-                 y > platform.getY() + platform.getHeight() &&
-                 velocityY < 0) {
-            y = platform.getY() + platform.getHeight() + radius; // Adjust position below the platform
-            velocityY = -velocityY * 0.8;
+        // Bottom collision: If previously ball was below the platform 
+        // (oldY - radius >= platformBottom) and now y - radius < platformBottom
+        else if (oldY - radius >= platform.getY() + platform.getHeight() && (y - radius < platform.getY() + platform.getHeight())) {
+            y = platform.getY() + platform.getHeight() + radius;
+            velocityY = 0; // Stop upward movement
+            // No onGround here because hitting bottom means you're under the platform
+            verticalCollision = true;
         }
-        // Side collisions can be added here if needed
+
+        // If no vertical collision was detected, check horizontal collision:
+        // Only makes sense if the ball overlaps and didn't collide vertically.
+        if (!verticalCollision) {
+            // Left side collision: ball moving from left to right
+            // oldX + radius <= platform.getX() and now x + radius > platform.getX()
+            if (oldX + radius <= platform.getX() && x + radius > platform.getX()) {
+                x = platform.getX() - radius;
+                velocityX = 0; 
+            }
+            // Right side collision: ball moving from right to left
+            // oldX - radius >= platformRight and now x - radius < platformRight
+            else if (oldX - radius >= platform.getX() + platform.getWidth() && (x - radius < platform.getX() + platform.getWidth())) {
+                x = platform.getX() + platform.getWidth() + radius;
+                velocityX = 0;
+            }
+        }
+
+        // If no vertical collision occurred, onGround remains what it was before:
+        // Since we reset onGround to false in updatePosition, it remains false unless top collision sets it true.
     }
 
     public void draw(Graphics g) {
