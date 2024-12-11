@@ -26,7 +26,7 @@ public class Ball {
 
     private void loadImage() {
         try {
-            ballImage = ImageIO.read(new File("ball_spritesheet.png")); // Adjust to the actual path
+            ballImage = ImageIO.read(new File("balley.png")); // Adjust to the actual path
         } catch (IOException e) {
             System.err.println("Failed to load ball image.");
             e.printStackTrace();

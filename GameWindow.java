@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class GameWindow extends JPanel implements KeyListener {
@@ -27,6 +29,11 @@ public class GameWindow extends JPanel implements KeyListener {
     private long frameCount = 0;
     private long updateCount = 0;
     private long lastUpdateTime = System.nanoTime(); // To track delta time
+    private Villain villain;
+    private List<ProjectileSpike> projectiles = new ArrayList<>();
+    private ParticleManager particleManager = new ParticleManager();
+    private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
 
     private void togglePause() {
         isPaused = !isPaused;
@@ -88,17 +95,22 @@ public class GameWindow extends JPanel implements KeyListener {
         // backgroundImage = new ImageIcon("src/bgm.jpg").getImage();
 
         // Setup a game loop using a Timer (16ms per frame = ~60 FPS)
-        gameTimer = new Timer(16, e -> gameLoop());
+        gameTimer = new Timer(5, e -> gameLoop());
+
+
         gameTimer.start();
     }
 
     private void initializeGameObjects() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        // screenSize is now a class-level field, so no need to redefine it here.
+    
+        villain = new Villain(200, screenSize.height - 300); // position the villain somewhere
+    
         int windowWidth = (int) screenSize.getWidth();
         int windowHeight = (int) screenSize.getHeight();
-
+    
         ball = new Ball(windowWidth / 2, windowHeight - 100, 30);
-
+    
         LevelManager.LevelData levelData = levelManager.loadLevel();
         if (levelData != null) {
             platforms = levelData.platforms;
@@ -107,22 +119,40 @@ public class GameWindow extends JPanel implements KeyListener {
         }
         levelStartTime = System.currentTimeMillis();
     }
+    
 
     private void gameLoop() {
         if (isPaused) {
-            // Reset the last update time so deltaTime does not accumulate while paused
             lastUpdateTime = System.nanoTime();
-            return; // No updates while paused
+            return; 
         }
-
+    
         long currentTime = System.nanoTime();
-        double deltaTime = (currentTime - lastUpdateTime) / 1e9; // Convert to seconds
+        double deltaTime = (currentTime - lastUpdateTime) / 1e9;
         lastUpdateTime = currentTime;
-
+    
         if (!gameOver && !gameWon) {
-            // Update ball position only if not paused
             ball.updatePosition(deltaTime);
-
+    
+            // Update villain
+            villain.update(deltaTime, ball, projectiles);
+    
+            // Update projectiles
+            Iterator<ProjectileSpike> it = projectiles.iterator();
+            while (it.hasNext()) {
+                ProjectileSpike p = it.next();
+                p.update(deltaTime);
+    
+                if (p.intersectsBall(ball)) {
+                    gameOver = true;
+                    it.remove();
+                    particleManager.spawnEffect(ball.getX(), ball.getY()); 
+                    playLoseSound(); // Consider playing the lose sound here
+                } else if (p.isOutOfBounds()) {
+                    it.remove();
+                }
+            }
+    
             // Handle collisions with spikes
             if (spikes != null) {
                 for (Spike spike : spikes) {
@@ -133,7 +163,7 @@ public class GameWindow extends JPanel implements KeyListener {
                     }
                 }
             }
-
+    
             // Handle collisions with platforms
             if (platforms != null) {
                 for (Platform platform : platforms) {
@@ -142,17 +172,21 @@ public class GameWindow extends JPanel implements KeyListener {
                     }
                 }
             }
-
+    
             // Check for goal
             if (goal != null && goal.isBallInGoal(ball)) {
                 gameWon = true;
                 playWinSound();
             }
         }
-
+    
+        // Update particle effects
+        particleManager.update(deltaTime);
+    
         frameCount++;
-        repaint(); // Trigger rendering
+        repaint(); 
     }
+    
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -192,6 +226,11 @@ public class GameWindow extends JPanel implements KeyListener {
         if (goal != null) {
             goal.draw(g);
         }
+        villain.draw(g);
+        for (ProjectileSpike p : projectiles) {
+        p.draw(g);
+        }
+particleManager.draw(g);
 
         // Debug info
         if (debugMode) {
