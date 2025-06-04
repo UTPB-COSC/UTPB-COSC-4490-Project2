@@ -1,27 +1,23 @@
 package src;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 
 public class Cloud
 {
-	Toolkit tk;
-
-	public int yPos;
-	public int xPos;
+	public double yPos;
+	public double xPos;
 
 	public double xVel;
 
-	public int width;
-	public int height;
+	public double width;
+	public double height;
 
-	public BufferedImage image;
+	public Image image;
 	public boolean passed;
 	public int index;
 
-	public Cloud(Game g, Toolkit tk) {
-		this.tk = tk;
-
+	public Cloud(JFXFlappy g) {
 		index = (int) (Math.random() * g.clouds.length);
 		boolean duplicate = true;
 		while(duplicate)
@@ -38,32 +34,30 @@ public class Cloud
 			if (duplicate)
 				index = (int) (Math.random() * g.clouds.length);
 		}
+		image = g.cloudImage[index];
 
 		int r = (int) (Math.random() * 3.0) + 3;
-		width = tk.getScreenSize().width / r;
-		height = (int)(((double)width / (double)g.cloudImage[index].getWidth()) * (g.cloudImage[index].getHeight()));
+		width = Util.SCREEN_WIDTH / r;
+		height = (int)(((double)width / g.cloudImage[index].getWidth()) * (g.cloudImage[index].getHeight()));
 
-		Image temp = g.cloudImage[index].getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH);
-		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		Graphics x = image.getGraphics();
-		x.drawImage(temp, 0, 0, null);
-		x.dispose();
-
-		xPos = tk.getScreenSize().width + 10;
-		yPos = (int) (Math.random() * (4 * tk.getScreenSize().height / 5));
+		xPos = Util.SCREEN_WIDTH + 10;
+		yPos = (int) (Math.random() * ((4.0 * Util.SCREEN_HEIGHT) / 5.0));
 
 		xVel = (Math.random() * 0.2 + 0.2) * 5.0;
 	}
 
-	public void drawCloud(Graphics g)
+	public void drawCloud(GraphicsContext gc)
 	{
-		g.drawImage(image, xPos, yPos, null);
+		gc.save();
+		gc.translate(xPos + width / 2.0, yPos + height / 2.0);
+		gc.drawImage(image, -width / 2.0, -height / 2.0, width, height);
+		gc.restore();
 	}
 
-	public void update()
+	public void update(double delta)
 	{
-		xPos -= xVel;
-		if (xPos + width < -tk.getScreenSize().width / 2)
+		xPos -= (int)(xVel * delta);
+		if (xPos + width < -Util.SCREEN_WIDTH / 2)
 			passed = true;
 	}
 }

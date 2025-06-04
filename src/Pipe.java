@@ -1,58 +1,62 @@
 package src;
 
-import java.awt.*;
+import javafx.scene.canvas.GraphicsContext;
 
 public class Pipe
 {
-	Game game;
+	JFXFlappy game;
 
-	private Toolkit tk;
-
-	public int yPos;
-	public int xPos;
+	public double yPos;
+	public double xPos;
 
 	public double defaultVel = 3.0;
 	public double xVel = 3.0;
 
-	public int width;
-	public int height;
-	public int gap;
+	public double width;
+	public double height;
+	public double gap;
 
 	private boolean scoreable = true;
 	public boolean spawnable = true;
 
-	public Pipe(Game g, Toolkit tk, int y, int w, int h)
+	public Pipe(JFXFlappy g, int y, int w, int h)
 	{
 		game = g;
-		this.tk = tk;
 
-		xPos = tk.getScreenSize().width;
+		xPos = Util.SCREEN_WIDTH;
 
 		width = w;
 		height = h;
 		if (g.randomGaps) {
-			int range = tk.getScreenSize().height / 3;
-			gap = tk.getScreenSize().height / 6 + (int) (Math.random() * range);
+			double range = Util.SCREEN_HEIGHT / 3;
+			gap = Util.SCREEN_HEIGHT / 6 + (int) (Math.random() * range);
 		} else {
-			gap = tk.getScreenSize().height / 3;
+			gap = Util.SCREEN_HEIGHT / 3;
 		}
 
 		yPos = y + gap / 2;
 	}
 
-	public void drawPipe(Graphics g)
+	public void drawPipe(GraphicsContext gc)
 	{
-		Graphics2D g2d = (Graphics2D) g;
-		g2d.drawImage(game.pipeImage, xPos, yPos, null);
-		g2d.drawImage(game.flippedPipe, xPos, yPos - gap - height, null);
+		gc.save();
+		gc.translate(xPos + width / 2.0, yPos + height / 2.0);
+		gc.drawImage(game.pipeImage, -width / 2.0, -height / 2.0, width, height);
+		gc.restore();
+
+		gc.save();
+		gc.translate(xPos + width / 2.0, yPos - gap - height / 2.0);
+		gc.rotate(180);
+		gc.drawImage(game.pipeImage, -width / 2.0, -height / 2.0, width, height);
+		gc.restore();
 	}
 
-	public boolean update()
+	public boolean update(double delta)
 	{
-		xVel = defaultVel + game.difficulty;
+		xVel = (defaultVel + game.difficulty) * delta;
 		xPos -= xVel;
 
-		if (scoreable && xPos < tk.getScreenSize().width / 2)
+		if (scoreable && xPos < Util.SCREEN_WIDTH / 2)
 		{
 			scoreable = false;
 			return true;
