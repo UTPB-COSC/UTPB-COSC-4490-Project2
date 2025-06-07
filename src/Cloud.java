@@ -18,30 +18,15 @@ public class Cloud
 	public int index;
 
 	public Cloud(JFXFlappy g) {
-		index = (int) (Math.random() * g.clouds.length);
-		boolean duplicate = true;
-		while(duplicate)
-		{
-			duplicate = false;
-			for (int i = 0; i < g.clouds.length; i++)
-			{
-				if (g.clouds[i] != null && !g.clouds[i].passed && g.clouds[i].index == index)
-				{
-					duplicate = true;
-					break;
-				}
-			}
-			if (duplicate)
-				index = (int) (Math.random() * g.clouds.length);
-		}
+		index = (int) (Math.random() * g.numClouds);
 		image = g.cloudImage[index];
 
 		int r = (int) (Math.random() * 3.0) + 3;
 		width = Util.SCREEN_WIDTH / r;
-		height = (int)(((double)width / g.cloudImage[index].getWidth()) * (g.cloudImage[index].getHeight()));
+		height = (width / g.cloudImage[index].getWidth()) * (g.cloudImage[index].getHeight());
 
 		xPos = Util.SCREEN_WIDTH + 10;
-		yPos = (int) (Math.random() * ((4.0 * Util.SCREEN_HEIGHT) / 5.0));
+		yPos = Math.random() * ((4.0 * Util.SCREEN_HEIGHT) / 5.0);
 
 		xVel = (Math.random() * 0.2 + 0.2) * 5.0;
 	}

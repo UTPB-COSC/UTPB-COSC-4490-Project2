@@ -6,35 +6,35 @@ public class Pipe
 {
 	JFXFlappy game;
 
+	public double xPos = Util.SCREEN_WIDTH;
 	public double yPos;
-	public double xPos;
 
 	public double defaultVel = 3.0;
 	public double xVel = 3.0;
 
 	public double width;
 	public double height;
-	public double gap;
+	public final double gap = Util.SCREEN_HEIGHT / 3;
 
 	private boolean scoreable = true;
 	public boolean spawnable = true;
 
-	public Pipe(JFXFlappy g, int y, int w, int h)
+	public Pipe(JFXFlappy g, int y, int w, int h, boolean bricks)
 	{
 		game = g;
 
-		xPos = Util.SCREEN_WIDTH;
-
 		width = w;
 		height = h;
-		if (g.randomGaps) {
-			double range = Util.SCREEN_HEIGHT / 3;
-			gap = Util.SCREEN_HEIGHT / 6 + (int) (Math.random() * range);
-		} else {
-			gap = Util.SCREEN_HEIGHT / 3;
-		}
 
-		yPos = y + gap / 2;
+		double gap2 = gap / 2;
+		yPos = y + gap2;
+
+		if (bricks) {
+			Bricks b1 = new Bricks(g, xPos, yPos - gap, width, gap2);
+			Bricks b2 = new Bricks(g, xPos, yPos - gap2, width, gap2);
+			g.bricks.add(b1);
+			g.bricks.add(b2);
+		}
 	}
 
 	public void drawPipe(GraphicsContext gc)

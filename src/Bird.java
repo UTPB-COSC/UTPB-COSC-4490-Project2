@@ -91,6 +91,19 @@ public class Bird
 		return false;
 	}
 
+	public boolean collide(Bricks brick) {
+		if (xPos + width - xGrace < brick.xPos)
+			return false;
+		if (xPos + xGrace > brick.xPos + brick.width)
+			return false;
+		if (yPos + height - yGrace < brick.yPos)
+			return false;
+		if (yPos + yGrace > brick.yPos + brick.height)
+			return false;
+		game.playClip("collide");
+		return true;
+	}
+
 	public void flap()
 	{
 		yVel -= 5.0;
